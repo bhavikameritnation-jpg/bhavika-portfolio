@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bhavika — a teenager trying to survive</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+
+    <style>
+        /* --------------------------------------------------
+           1. CORE STYLES & RESET
+           -------------------------------------------------- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-color: #070707;
+            --text-main: #f3f3f3;
+            --text-dim: #707070;
+            --font-serif: 'Cormorant Garamond', serif;
+            --font-mono: 'Space Mono', monospace;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: var(--font-mono);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* Subtle atmospheric grid/grain */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: radial-gradient(circle, rgba(255,255,255,0.02) 1px, transparent 1px);
+            background-size: 32px 32px;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* --------------------------------------------------
+           2. HERO / SKY SECTION
+           -------------------------------------------------- */
+        .sky-hero {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        .hero-title {
+            font-family: var(--font-serif);
+            font-size: clamp(3rem, 7vw, 5.5rem);
+            font-weight: 300;
+            letter-spacing: 0.04em;
+            z-index: 10;
+            pointer-events: none;
+            user-select: none;
+        }
+
+        .hero-subtitle {
+            font-family: var(--font-mono);
+            font-size: clamp(0.8rem, 1.5vw, 0.95rem);
+            color: var(--text-dim);
+            letter-spacing: 0.12em;
+            margin-top: 0.5rem;
+            z-index: 10;
+            pointer-events: none;
+            user-select: none;
+        }
+
+        #constellation-canvas {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        /* Layer 1: Ambient Background Stars */
+        .ambient-star {
+            position: absolute;
+            background-color: #ffffff;
+            border-radius: 50%;
+            opacity: 0.3;
+            pointer-events: none;
+            z-index: 2;
+            animation: twinkle var(--duration, 4s) infinite ease-in-out;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.15; }
+            50% { opacity: 0.65; }
+        }
+
+        /* Layer 2: Interactive Poem Stars (Scaled Up!) */
+        .poem-star {
+            position: absolute;
+            font-size: var(--star-size, 3rem);
+            color: #ffffff;
+            cursor: pointer;
+            z-index: 5;
+            transition: transform 0.3s ease, text-shadow 0.3s ease;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 60px;
+            height: 60px;
+            transform: translate(-50%, -50%);
+        }
+
+        .poem-star:hover {
+            transform: translate(-50%, -50%) scale(1.35);
+            text-shadow: 0 0 16px rgba(255,255,255,0.9);
+        }
+
+        /* Star Tooltip */
+        .star-tooltip {
+            position: absolute;
+            bottom: 110%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(12, 12, 12, 0.95);
+            border: 1px solid #2a2a2a;
+            padding: 0.75rem 1.2rem;
+            white-space: nowrap;
+            pointer-events: none;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.25s ease, transform 0.25s ease;
+            z-index: 20;
+            text-align: center;
+            border-radius: 2px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        }
+
+        .poem-star:hover .star-tooltip {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(-6px);
+        }
+
+        .tooltip-title {
+            font-family: var(--font-serif);
+            font-size: 1.35rem;
+            font-weight: 400;
+            color: #ffffff;
+            display: block;
+            margin-bottom: 0.2rem;
+        }
+
+        .tooltip-journal {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        /* --------------------------------------------------
+           3. ABOUT SECTION (REFINED HUMAN LAYOUT)
+           -------------------------------------------------- */
+        .about-section {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 6rem 2rem 12rem 2rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        .divider {
+            border: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #252525, transparent);
+            margin-bottom: 7rem;
+        }
+
+        .about-group {
+            margin-bottom: 5.5rem;
+        }
+
+        .about-heading {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            letter-spacing: 0.2em;
+            margin-bottom: 2rem;
+            text-transform: uppercase;
+        }
+
+        .about-items {
+            display: flex;
+            flex-direction: column;
+            gap: 1.4rem;
+        }
+
+        .about-item {
+            font-family: var(--font-mono);
+            font-size: 1.05rem;
+            color: var(--text-main);
+            letter-spacing: -0.01em;
+        }
+
+        .sub-text {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            margin-top: 0.2rem;
+            font-style: italic;
+        }
+
+        .footer-note {
+            font-family: var(--font-serif);
+            font-style: italic;
+            font-size: 1.2rem;
+            color: var(--text-dim);
+            text-align: center;
+            margin-top: 8rem;
+            opacity: 0.7;
+        }
+
+        /* Responsive tweaks for mobile */
+        @media (max-width: 600px) {
+            .poem-star {
+                font-size: 2.2rem !important;
+            }
+            .about-section {
+                padding: 4rem 1.5rem 8rem 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <section class="sky-hero" id="sky">
+        <canvas id="constellation-canvas"></canvas>
+        
+        <h1 class="hero-title">Bhavika</h1>
+        <p class="hero-subtitle">a teenager trying to survive</p>
+
+        <div id="poem-stars-container"></div>
+    </section>
+
+    <section class="about-section">
+        <hr class="divider">
+
+        <div class="about-group">
+            <h2 class="about-heading">CAN</h2>
+            <div class="about-items">
+                <div class="about-item">
+                    yap nonstop
+                    <span class="sub-text">(might need water and food occasionally)</span>
+                </div>
+                <div class="about-item">play piano · harmonium · harmonica</div>
+                <div class="about-item">
+                    sing
+                    <span class="sub-text">(mostly in showers)</span>
+                </div>
+                <div class="about-item">read</div>
+                <div class="about-item">write</div>
+            </div>
+        </div>
+
+        <div class="about-group">
+            <h2 class="about-heading">WOULD LEARN IF SHE HAD THE TIME (AND SKILLS)</h2>
+            <div class="about-items">
+                <div class="about-item">crochet</div>
+                <div class="about-item">guitar</div>
+                <div class="about-item">cooking</div>
+                <div class="about-item">skateboarding</div>
+            </div>
+        </div>
+
+        <div class="about-group">
+            <h2 class="about-heading">ALSO</h2>
+            <div class="about-items">
+                <div class="about-item">might be the coolest person you meet</div>
+            </div>
+        </div>
+
+        <p class="footer-note">more stars taking shape...</p>
+    </section>
+
+    <script>
+        /* --------------------------------------------------
+           1. PUBLISHED POEMS DATA STRUCTURE
+           -------------------------------------------------- */
+        const publishedPoems = [
+            {
+                title: "Paper Constellations",
+                journal: "The Literary Review",
+                year: "2024",
+                symbol: "✦",
+                size: "3.5rem",
+                top: "22%",
+                left: "18%"
+            },
+            {
+                title: "Notes on Static",
+                journal: "Void Journal",
+                year: "2025",
+                symbol: "✧",
+                size: "2.8rem",
+                top: "32%",
+                left: "78%"
+            },
+            {
+                title: "Midnight Syntax",
+                journal: "Polyphony Lit",
+                year: "2025",
+                symbol: "✩",
+                size: "3.2rem",
+                top: "68%",
+                left: "82%"
+            },
+            {
+                title: "Quiet Geography",
+                journal: "Adroit Journal",
+                year: "2026",
+                symbol: "✶",
+                size: "3.8rem",
+                top: "72%",
+                left: "25%"
+            },
+            {
+                title: "Acoustic Horizon",
+                journal: "Rust & Moth",
+                year: "2025",
+                symbol: "✷",
+                size: "2.5rem",
+                top: "55%",
+                left: "52%"
+            }
+        ];
+
+        /* --------------------------------------------------
+           2. RENDER POEM STARS
+           -------------------------------------------------- */
+        const starsContainer = document.getElementById('poem-stars-container');
+
+        publishedPoems.forEach((poem, index) => {
+            const starEl = document.createElement('div');
+            starEl.className = 'poem-star';
+            starEl.style.top = poem.top;
+            starEl.style.left = poem.left;
+            starEl.style.setProperty('--star-size', poem.size);
+            starEl.setAttribute('data-index', index);
+            starEl.innerHTML = `
+                ${poem.symbol}
+                <div class="star-tooltip">
+                    <span class="tooltip-title">${poem.title}</span>
+                    <span class="tooltip-journal">Published in ${poem.journal} (${poem.year})</span>
+                </div>
+            `;
+            starsContainer.appendChild(starEl);
+        });
+
+        /* --------------------------------------------------
+           3. GENERATE AMBIENT ATMOSPHERE (LAYER 1)
+           -------------------------------------------------- */
+        const sky = document.getElementById('sky');
+        const ambientCount = 70;
+
+        for (let i = 0; i < ambientCount; i++) {
+            const star = document.createElement('div');
+            star.className = 'ambient-star';
+            const size = Math.random() * 2 + 1 + 'px';
+            star.style.width = size;
+            star.style.height = size;
+            star.style.top = Math.random() * 100 + '%';
+            star.style.left = Math.random() * 100 + '%';
+            star.style.setProperty('--duration', (Math.random() * 3 + 3) + 's');
+            sky.appendChild(star);
+        }
+
+        /* --------------------------------------------------
+           4. NEAREST-NEIGHBOR CONSTELLATION LINES
+           -------------------------------------------------- */
+        const canvas = document.getElementById('constellation-canvas');
+        const ctx = canvas.getContext('2d');
+        const poemStarElements = document.querySelectorAll('.poem-star');
+
+        function resizeCanvas() {
+            canvas.width = sky.clientWidth;
+            canvas.height = sky.clientHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        function getStarCenter(el) {
+            const rect = el.getBoundingClientRect();
+            const skyRect = sky.getBoundingClientRect();
+            return {
+                x: rect.left - skyRect.left + rect.width / 2,
+                y: rect.top - skyRect.top + rect.height / 2
+            };
+        }
+
+        poemStarElements.forEach(activeStar => {
+            activeStar.addEventListener('mouseenter', () => {
+                const activePos = getStarCenter(activeStar);
+                
+                // 1. Calculate distances from active star to all other stars
+                const distances = [];
+                poemStarElements.forEach(otherStar => {
+                    if (otherStar !== activeStar) {
+                        const otherPos = getStarCenter(otherStar);
+                        const dx = otherPos.x - activePos.x;
+                        const dy = otherPos.y - activePos.y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        distances.push({ pos: otherPos, dist: dist });
+                    }
+                });
+
+                // 2. Sort by distance and pick the 2 closest neighbors
+                distances.sort((a, b) => a.dist - b.dist);
+                const nearestNeighbors = distances.slice(0, 2);
+
+                // 3. Draw subtle connecting constellation lines
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+                ctx.lineWidth = 1;
+                ctx.setLineDash([4, 4]); // Delicate dashed constellation feel
+
+                nearestNeighbors.forEach(neighbor => {
+                    ctx.beginPath();
+                    ctx.moveTo(activePos.x, activePos.y);
+                    ctx.lineTo(neighbor.pos.x, neighbor.pos.y);
+                    ctx.stroke();
+                });
+            });
+
+            activeStar.addEventListener('mouseleave', () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            });
+        });
+    </script>
+</body>
+</html>
